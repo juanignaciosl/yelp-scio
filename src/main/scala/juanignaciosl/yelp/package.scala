@@ -8,4 +8,6 @@ package object yelp {
   type StateAbbr = String
   type WeekDay = String
   type BusinessSchedule = String
+  type BusinessTime = String
+  type BusinessWeekSchedule = Map[WeekDay, BusinessSchedule]
 }
