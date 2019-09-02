@@ -20,8 +20,8 @@ object YelpBusinessesLocalRunner extends YelpDataProcessor {
 
     val businessesPath = s"$inputDir/business.json"
     val businesses = sc.jsonFile[BusinessLine](businessesPath)
-    val openBusinesses = filterOpenBusinesses(businesses)
-    businesses.count.saveAsTextFile(s"$outputDir/xxx.csv")
+    val openBusinesses = filterWithHours(filterOpenBusinesses(businesses))
+    openBusinesses.count.saveAsTextFile(s"$outputDir/xxx.csv")
 
     sc.close().waitUntilFinish()
   }
@@ -40,5 +40,9 @@ case class BusinessLine(business_id: BusinessId,
 trait YelpDataProcessor {
   def filterOpenBusinesses(businesses: SCollection[BusinessLine]): SCollection[BusinessLine] = {
     businesses.filter(_.isOpen)
+  }
+
+  def filterWithHours(businesses: SCollection[BusinessLine]): SCollection[BusinessLine] = {
+    businesses.filter(_.hours.isDefined)
   }
 }

@@ -55,4 +55,15 @@ class YelpDataProcesorTest extends PipelineSpec with YelpDataProcessor {
       openBusinesses should containInAnyOrder(Seq(openBusiness))
     }
   }
+
+  "filterWithHours" should "drop businesses without hours" in {
+    val withHours = businessTemplate.copy(hours = Some(Map("Monday" -> "9:0-0:0")))
+    val withoutHours = businessTemplate.copy(hours = None)
+    runWithContext{sc =>
+      val businessesWithHours = filterWithHours(sc.parallelize(Seq(withHours, withoutHours)))
+      businessesWithHours shouldNot containInAnyOrder(Seq(withoutHours))
+      businessesWithHours should containInAnyOrder(Seq(withHours))
+    }
+
+  }
 }
