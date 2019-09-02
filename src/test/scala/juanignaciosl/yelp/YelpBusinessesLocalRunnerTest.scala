@@ -25,12 +25,24 @@ class YelpBusinessesLocalRunnerTest extends PipelineSpec {
 
   "YelpStatsRunner" should "create openpast file" in {
     val businessesData = Seq(businessTemplate)
-    val outputFile = s"$outputDir/openpast-2100.csv"
-    val expected = "My State,My City,1,0,0,0,0,0,0"
+    val outputOpenPastFile = s"$outputDir/openpast-2100.csv"
+    val outputOpening05 = s"$outputDir/opening-0.5.csv"
+    val outputOpening95 = s"$outputDir/opening-0.95.csv"
+    val outputClosing05 = s"$outputDir/closing-0.5.csv"
+    val outputClosing95 = s"$outputDir/closing-0.95.csv"
+    val expectedOpenPast = "My State,My City,1,0,0,0,0,0,0"
+    val expectedOpening05 = "My State,My City,Z1PC0D3,09:00,,,,,,"
+    val expectedOpening95 = "My State,My City,Z1PC0D3,09:00,,,,,,"
+    val expectedClosing05 = "My State,My City,Z1PC0D3,00:00,,,,,,"
+    val expectedClosing95 = "My State,My City,Z1PC0D3,00:00,,,,,,"
     JobTest[YelpBusinessesLocalRunner.type]
       .args(s"--input=$dataDir", s"--output=$outputDir")
       .input(JsonIO[Business](inputFile), businessesData)
-      .output(TextIO(outputFile))(_ should containValue(expected))
+      .output(TextIO(outputOpenPastFile))(_ should containValue(expectedOpenPast))
+      .output(TextIO(outputOpening05))(_ should containValue(expectedOpening05))
+      .output(TextIO(outputOpening95))(_ should containValue(expectedOpening95))
+      .output(TextIO(outputClosing05))(_ should containValue(expectedClosing05))
+      .output(TextIO(outputClosing95))(_ should containValue(expectedClosing95))
       .run()
   }
 
@@ -81,7 +93,46 @@ class YelpDataProcessorTest extends PipelineSpec with YelpDataProcessor {
       val expected = (("State", "City"), List(1, 0, 0, 0, 0, 0, 0))
       openBusinessesCount should containSingleValue(expected)
     }
+  }
 
+  "computePercentiles" should "compute .5 and .95 percentiles when there's only one matching business" in {
+    val hours = Seq(
+      Map("Monday" -> "9:00-10:00"),
+      Map("Tuesday" -> "10:00-11:00")
+    ).map(("State", "City", "PostalCode", _))
+    runWithContext { sc =>
+      val groupedHours = sc.parallelize(hours).keyBy(h => (h._1, h._2, h._3)).mapValues(_._4)
+
+      val result = computePercentiles(groupedHours, List(.5, .95), _.split('-')(0))
+      val expected = (("State", "City", "PostalCode"),
+        Map(
+          "Monday" -> List("09:00", "09:00"),
+          "Tuesday" -> List("10:00", "10:00")
+        )
+      )
+      result should containSingleValue(expected)
+    }
+  }
+
+  "computePercentiles" should "compute .5 and .95 percentiles" in {
+    val hours = (8 to 11).map(h =>
+      Map(
+        "Monday" -> s"$h:0-0:0",
+        "Tuesday" -> s"${h + 1}:0-0:0"
+      )
+    ).map(("State", "City", "PostalCode", _))
+    runWithContext { sc =>
+      val groupedHours = sc.parallelize(hours).keyBy(h => (h._1, h._2, h._3)).mapValues(_._4)
+
+      val result = computePercentiles(groupedHours, List(.5, .95), _.split('-')(0))
+      val expected = (("State", "City", "PostalCode"),
+        Map(
+          "Monday" -> List("09:00", "11:00"),
+          "Tuesday" -> List("10:00", "12:00")
+        )
+      )
+      result should containSingleValue(expected)
+    }
   }
 }
 

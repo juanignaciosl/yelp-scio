@@ -8,7 +8,8 @@ It uses [a Yelp sample dataset](https://www.yelp.com/dataset/) ([documentation](
 
 ## Roadmap
 
-- [ ] Happy path of an analysis of open businesses, median and p95 opening and closing times.
+- [X] Happy path of an analysis of open businesses, median and p95 opening and closing times.
+- [ ] Happy path for coolness joins.
 - [ ] Happy path pieces testing.
 - [ ] Local run.
 - [ ] Dataflow run.
@@ -18,6 +19,16 @@ It uses [a Yelp sample dataset](https://www.yelp.com/dataset/) ([documentation](
 - [ ] Better output formats:
   - [ ] SQLite for better typing and interoperability.
   - [ ] Parquet or Avro for performance.
+- Refactor:
+  - [ ] Remove Exception throwing.
+
+## Running
+
+### Local
+
+Default output is at `/tmp/yelp-scio`.
+
+`runMain juanignaciosl.yelp.YelpBusinessesLocalRunner --input=<path-to-yelp-data-dir> --output=<output-dir>`
 
 ## Features:
 

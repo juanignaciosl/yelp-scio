@@ -10,4 +10,7 @@ package object yelp {
   type BusinessSchedule = String
   type BusinessTime = String
   type BusinessWeekSchedule = Map[WeekDay, BusinessSchedule]
+
+  type WeekCount = List[Int]
+  type WeekBusinessTime = Map[WeekDay, BusinessTime]
 }
