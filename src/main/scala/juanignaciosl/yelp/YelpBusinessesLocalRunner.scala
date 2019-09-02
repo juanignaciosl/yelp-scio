@@ -2,6 +2,7 @@ package juanignaciosl.yelp
 
 import com.spotify.scio._
 import com.spotify.scio.extra.json._
+import com.spotify.scio.values.SCollection
 
 /*
 sbt "runMain [PACKAGE].WordCount
@@ -10,7 +11,7 @@ sbt "runMain [PACKAGE].WordCount
   --output=gs://[BUCKET]/[PATH]/wordcount"
 */
 
-object YelpBusinessesLocalRunner {
+object YelpBusinessesLocalRunner extends YelpDataProcessor {
   def main(cmdlineArgs: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(cmdlineArgs)
 
@@ -19,6 +20,7 @@ object YelpBusinessesLocalRunner {
 
     val businessesPath = s"$inputDir/business.json"
     val businesses = sc.jsonFile[BusinessLine](businessesPath)
+    val openBusinesses = filterOpenBusinesses(businesses)
     businesses.count.saveAsTextFile(s"$outputDir/xxx.csv")
 
     sc.close().waitUntilFinish()
@@ -31,4 +33,12 @@ case class BusinessLine(business_id: BusinessId,
                         postal_code: PostalCode,
                         city: City,
                         state: StateAbbr,
-                        hours: Option[Map[WeekDay, BusinessSchedule]]) extends Serializable
+                        hours: Option[Map[WeekDay, BusinessSchedule]]) extends Serializable {
+  lazy val isOpen: Boolean = is_open == 1
+}
+
+trait YelpDataProcessor {
+  def filterOpenBusinesses(businesses: SCollection[BusinessLine]): SCollection[BusinessLine] = {
+    businesses.filter(_.isOpen)
+  }
+}
