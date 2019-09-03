@@ -9,9 +9,10 @@ It uses [a Yelp sample dataset](https://www.yelp.com/dataset/) ([documentation](
 ## Roadmap
 
 - [X] Happy path of an analysis of open businesses, median and p95 opening and closing times.
-- [ ] Happy path for coolness joins.
-- [ ] Happy path pieces testing.
-- [ ] Local run.
+- [X] Happy path for coolness joins.
+- [X] Happy path pieces testing.
+- [X] Local run.
+- [ ] Merge output files?
 - [ ] Dataflow run.
 - [ ] Make code failures observable. Example: add more wrong data and check that you can see the broken line.
 - [ ] Review and optimize performance.

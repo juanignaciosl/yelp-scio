@@ -13,4 +13,7 @@ package object yelp {
 
   type WeekCount = List[Int]
   type WeekBusinessTime = Map[WeekDay, BusinessTime]
+
+  type ReviewId = String
+  type CoolnessCount = Int
 }
