@@ -20,6 +20,9 @@ It uses [a Yelp sample dataset](https://www.yelp.com/dataset/) ([documentation](
 - [ ] Better output formats:
   - [ ] SQLite for better typing and interoperability.
   - [ ] Parquet or Avro for performance.
+- Pending fixes:
+  - [ ] Remove "0 coolness" businesses.
+  - [ ] Handle "coolness ties" in a deterministic way.
 - Refactor:
   - [ ] Remove Exception throwing.
 
