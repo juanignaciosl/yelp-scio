@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
-class YelpBusinessesLocalRunnerTest extends PipelineSpec {
+class YelpBusinessesRunnerTest extends PipelineSpec {
 
   private def businessTemplate = Business(
     Random.nextString(4),
@@ -26,8 +26,8 @@ class YelpBusinessesLocalRunnerTest extends PipelineSpec {
   )
 
   val dataDir = "/tmp/yelp_data"
-  val inputBusinesses = s"$dataDir/business.json"
-  val inputReviews = s"$dataDir/review.json"
+  val inputBusinesses = s"$dataDir/business.zip"
+  val inputReviews = s"$dataDir/review.zip"
   val outputDir = "/tmp/yelp-scio-test"
 
   "YelpStatsRunner" should "create openpast file" in {
@@ -45,7 +45,7 @@ class YelpBusinessesLocalRunnerTest extends PipelineSpec {
     val expectedClosing05 = "My State,My City,Z1PC0D3,00:00,,,,,,"
     val expectedClosing95 = "My State,My City,Z1PC0D3,00:00,,,,,,"
     val expectedCoolest = s"My State,My City,Z1PC0D3,${businessesData.head.business_id},${reviewsData.head.cool}"
-    JobTest[YelpBusinessesLocalRunner.type]
+    JobTest[YelpBusinessesRunner.type]
       .args(s"--input=$dataDir", s"--output=$outputDir")
       .input(JsonIO[Business](inputBusinesses), businessesData)
       .input(JsonIO[Review](inputReviews), reviewsData)

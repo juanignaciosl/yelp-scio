@@ -14,7 +14,7 @@ sbt "runMain [PACKAGE].WordCount
   --output=gs://[BUCKET]/[PATH]/wordcount"
 */
 
-object YelpBusinessesLocalRunner extends YelpDataProcessor {
+object YelpBusinessesRunner extends YelpDataProcessor {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -24,7 +24,7 @@ object YelpBusinessesLocalRunner extends YelpDataProcessor {
     val inputDir = args.getOrElse("input", "/tmp/yelp_data")
     val outputDir = args.getOrElse("output", "/tmp/yelp-scio")
 
-    val businessesPath = s"$inputDir/business.json"
+    val businessesPath = s"$inputDir/business.zip"
     val businesses = sc.jsonFile[Business](businessesPath)
     val openBusinesses = filterWithHours(filterOpenBusinesses(businesses))
 
@@ -32,9 +32,9 @@ object YelpBusinessesLocalRunner extends YelpDataProcessor {
     computeOpenBusinesses(outputDir, openBusinessesByStateAndCity)
     computePercentiles(outputDir, openBusinessesByStateAndCity, List(.5, .95))
 
-    computeCoolestBusinesses(outputDir, openBusinesses, sc.jsonFile[Review](s"$inputDir/review.json"))
+    computeCoolestBusinesses(outputDir, openBusinesses, sc.jsonFile[Review](s"$inputDir/review.zip"))
 
-    val result = sc.run().waitUntilFinish()
+    val result = sc.close().waitUntilFinish()
     logger.info(s"Done! State: ${result.state}")
   }
 

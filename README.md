@@ -12,8 +12,8 @@ It uses [a Yelp sample dataset](https://www.yelp.com/dataset/) ([documentation](
 - [X] Happy path for coolness joins.
 - [X] Happy path pieces testing.
 - [X] Local run.
+- [X] Dataflow run.
 - [ ] Merge output files?
-- [ ] Dataflow run.
 - [ ] Make code failures observable. Example: add more wrong data and check that you can see the broken line.
 - [ ] Review and optimize performance.
 - [ ] Mock x10 data and check that aggregation scales properly.
@@ -29,7 +29,33 @@ It uses [a Yelp sample dataset](https://www.yelp.com/dataset/) ([documentation](
 
 Default output is at `/tmp/yelp-scio`.
 
-`runMain juanignaciosl.yelp.YelpBusinessesLocalRunner --input=<path-to-yelp-data-dir> --output=<output-dir>`
+```bash
+$ export SBT_OPTS="-Xmx8G -Xms8G -Xss1M -XX:MaxMetaspaceSize=1G -XX:+CMSClassUnloadingEnabled -XX:ReservedCodeCacheSize=128m"
+$ sbt
+sbt:yelp-scio> runMain juanignaciosl.yelp.YelpBusinessesRunner --input=<path-to-yelp-data-dir> --output=<output-path-such-as-/tmp/yelp-scio-run>
+```
+
+### Google Dataflow
+
+Check [Setting Up Authentication for Server to Server Production Applications](https://developers.google.com/accounts/docs/application-default-credentials).
+
+The credentials needs access to:
+- Dataflow.
+- Google Storage buckets with the data.
+- Cloud Resource Manager API.
+
+Note: `-o GSUtil:parallel_composite_upload_threshold=150M` improves upload speed a lot ;-)
+
+Uploading files: `gsutil -o GSUtil:parallel_composite_upload_threshold=150M cp ./business.zip gs://yelp-scio/input`.
+
+```bash
+$ export GOOGLE_APPLICATION_CREDENTIALS=
+$ export SBT_OPTS="-Xmx4G -Xms4G -Xss1M -XX:MaxMetaspaceSize=1G -XX:+CMSClassUnloadingEnabled -XX:ReservedCodeCacheSize=128m"
+$ sbt
+sbt:yelp-scio> runMain juanignaciosl.yelp.YelpBusinessesRunner --project=yelp-scio --zone=us-east1-b --runner=DataflowRunner --input=gs://yelp-scio/input --output=gs://yelp-scio/output
+```
+
+You can download the output with this command: `gsutil cp -r gs://yelp-scio/output . `.
 
 ## Features:
 
